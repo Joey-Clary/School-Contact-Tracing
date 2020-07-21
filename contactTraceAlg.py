@@ -24,8 +24,7 @@ class TraceAlg:
         return classDict
     
     def getClassRoster(self, chkClass):
-        classRoster = self.classDict[chkClass]
-        return classRoster
+        return self.classDict[chkClass][:]
 
     def getStudentSchedule(self, chkName):
         studentDataFile = open(studentDataFileName, 'r')
@@ -54,10 +53,37 @@ class TraceAlg:
                     primaryContacts[stud] = [chkClass]
             hourNum += 1
         return primaryContacts
-    def main(self):
-        primaryContacts = self.getPrimaryContacts('Student1')
-        print(primaryContacts)
 
+    def getSecondaryContacts(self, chkName, primaryContacts=False):
+        if primaryContacts == False:
+            primaryContacts = self.getPrimaryContacts(chkName)
+        secondaryContacts = {}
+
+        for contactName in primaryContacts:
+            studInfo = self.getStudentSchedule(contactName)
+            del(studInfo[0])
+            del(studInfo[7])
+            hourNum = 1
+
+            for classTeach in studInfo:
+                chkClass = classTeach + str(hourNum)
+                classRoster = self.getClassRoster(chkClass)
+                classRoster.remove(contactName)
+                for stud in classRoster:
+                    try:
+                        secondaryContacts[stud].append(contactName)
+                    except(KeyError):
+                        secondaryContacts[stud] = [contactName]
+                hourNum += 1
+
+        return secondaryContacts
+
+    def main(self):
+        for i in range(1, 121):
+            chkStud = 'Student' + str(i)
+            primaryContacts = self.getPrimaryContacts(chkStud)
+            secondaryContacts = self.getSecondaryContacts(chkStud, primaryContacts)
+            print(chkStud, len(primaryContacts), len(secondaryContacts))
 if __name__ == "__main__":
     studentDataFileName = 'C:\\Users\\jclar\\Desktop\\School\\Senior\\School-Contact-Tracing\\demoSchedule.txt'
     trace = TraceAlg(studentDataFileName)
