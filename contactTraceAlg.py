@@ -37,27 +37,28 @@ class TraceAlg:
 
     def getPrimaryContacts(self, chkName):
         studInfo = self.getStudentSchedule(chkName)
+        print(studInfo)
         del(studInfo[0])
         del(studInfo[7])
+        print(studInfo)
         hourNum = 1
-        primaryContacts = {}
-
+        primaryContacts = []
         for classTeach in studInfo:
             chkClass = classTeach + str(hourNum)
             classRoster = self.getClassRoster(chkClass)
             classRoster.remove(chkName)
             for stud in classRoster:
-                try:
-                    primaryContacts[stud].append(chkClass)
-                except(KeyError):
-                    primaryContacts[stud] = [chkClass]
+                if stud in primaryContacts:
+                    continue
+                else:
+                    primaryContacts.append(stud)
             hourNum += 1
         return primaryContacts
 
     def getSecondaryContacts(self, chkName, primaryContacts=False):
         if primaryContacts == False:
             primaryContacts = self.getPrimaryContacts(chkName)
-        secondaryContacts = {}
+        secondaryContacts = primaryContacts[:]
 
         for contactName in primaryContacts:
             studInfo = self.getStudentSchedule(contactName)
@@ -70,20 +71,20 @@ class TraceAlg:
                 classRoster = self.getClassRoster(chkClass)
                 classRoster.remove(contactName)
                 for stud in classRoster:
-                    try:
-                        secondaryContacts[stud].append(contactName)
-                    except(KeyError):
-                        secondaryContacts[stud] = [contactName]
+                    if stud in secondaryContacts:
+                        continue
+                    else:
+                        secondaryContacts.append(stud)
                 hourNum += 1
 
         return secondaryContacts
 
     def main(self):
-        for i in range(1, 121):
-            chkStud = 'Student' + str(i)
-            primaryContacts = self.getPrimaryContacts(chkStud)
-            secondaryContacts = self.getSecondaryContacts(chkStud, primaryContacts)
-            print(chkStud, len(primaryContacts), len(secondaryContacts))
+        chkStud = 'Student1'
+        primaryContacts = self.getPrimaryContacts(chkStud)
+        secondaryContacts = self.getSecondaryContacts(chkStud, primaryContacts)
+        print(chkStud, len(primaryContacts), len(secondaryContacts))
+
 if __name__ == "__main__":
     studentDataFileName = 'C:\\Users\\jclar\\Desktop\\School\\Senior\\School-Contact-Tracing\\demoSchedule.txt'
     trace = TraceAlg(studentDataFileName)
